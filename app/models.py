@@ -1,5 +1,8 @@
-from datetime import datetime
-from mock import Mock
+import jwt
+import bcrypt
+import datetime
+from utils import env
+from app.database import DBQuery
 
 
 class ModelNotFoundException(Exception):
@@ -7,33 +10,19 @@ class ModelNotFoundException(Exception):
 
 
 class Entry:
+    __db = DBQuery('entries')
+
     def __init__(self):
         pass
 
     @staticmethod
-    def set_values(values):
-        Entry.__entries = values
-
-    # This variable is a list of entries. The entries are dictionaries.
-    __entries = []
-
-    # This variable is used to ensure all values have unique ids.
-    __autoincrement_id = 5  # type: int
-
-    @staticmethod
-    def __get_entry_index(entry_id):
-        for i, entry in enumerate(Entry.__entries):
-            if entry['id'] == entry_id:
-                return i
-        raise ModelNotFoundException
-
-    @staticmethod
-    def get_latest_id():
-        return Entry.__autoincrement_id
+    def __check(entry_id):
+        if Entry.__db.exists(entry_id) is False:
+            raise ModelNotFoundException
 
     @staticmethod
     def count():
-        return len(Entry.__entries)
+        return Entry.__db.count()
 
     @staticmethod
     def all():
@@ -41,7 +30,7 @@ class Entry:
         Returns all the entries.
         :rtype: list
         """
-        return Entry.__entries
+        return Entry.__db.select('*')
 
     @staticmethod
     def get(entry_id):
@@ -50,7 +39,8 @@ class Entry:
         :param entry_id:
         :rtype: dict or None
         """
-        return Entry.__entries[Entry.__get_entry_index(entry_id)]
+        Entry.__check(entry_id)
+        return Entry.__db.get(entry_id)
 
     @staticmethod
     def create(title, body):
@@ -58,17 +48,10 @@ class Entry:
         Creates an entry and returns a copy.
         :rtype: dict
         """
-        Entry.__autoincrement_id += 1
-        now = datetime.now()
-        entry = {
-            'id': Entry.__autoincrement_id,
+        return Entry.__db.insert({
             'title': title,
             'body': body,
-            'created_at': now,
-            'updated_at': now
-        }
-        Entry.__entries.append(entry)
-        return entry
+        })
 
     @staticmethod
     def update(entry_id, title, body):
@@ -79,11 +62,8 @@ class Entry:
         :param body:
         :rtype: dict
         """
-        index = Entry.__get_entry_index(entry_id)
-        Entry.__entries[index]['title'] = title
-        Entry.__entries[index]['body'] = body
-        Entry.__entries[index]['updated_at'] = datetime.now()
-        return Entry.__entries[index]
+        Entry.__check(entry_id)
+        return Entry.__db.update({'title': title, 'body': body}, {'id': entry_id})
 
     @staticmethod
     def delete(entry_id):
@@ -92,9 +72,56 @@ class Entry:
         :param entry_id:
         :rtype: bool
         """
-        del Entry.__entries[Entry.__get_entry_index(entry_id)]
+        Entry.__check(entry_id)
+        Entry.__db.delete({'id': entry_id})
         return True
 
 
-# Initialize model with mock entries
-Entry.set_values(Mock.entries(parse_dates=True))
+class User:
+    __db = DBQuery('users')
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def __hash_password(password):
+        return bcrypt.hashpw(password, bcrypt.gensalt())
+
+    @staticmethod
+    def __check_password(password, hashed):
+        return bcrypt.checkpw(password, hashed)
+
+    @staticmethod
+    def get_by_email(email):
+        selection = User.__db.select('*', {'email': email})
+        return selection[0] if len(selection) > 0 else None
+
+    @staticmethod
+    def create(name, email, password):
+        """
+        Creates an entry and returns a copy.
+        :rtype: dict
+        """
+        if User.get_by_email(email) is not None:
+            return False
+        return User.__db.insert({
+            'name': name,
+            'email': email,
+            'password': User.__hash_password(password)
+        })
+
+    @staticmethod
+    def check(email, password):
+        user = User.get_by_email(email)
+        if user is not None:
+            return User.__check_password(password, user['password'])
+        return False
+
+    @staticmethod
+    def generate_token(user):
+        # token payload
+        payload = {
+            'user': user['email'],
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=int(env('SESSION_LIFETIME')))
+        }
+        return jwt.encode(payload, env('APP_KEY'))

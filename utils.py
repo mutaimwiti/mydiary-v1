@@ -10,6 +10,10 @@ DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 ROOT_DIRECTORY = os.path.split(env_path)[0]
 
 
+def env(key, default=None):
+    return os.environ.get(key, default)
+
+
 def full_path(path=None):
     if path is None:
         return ROOT_DIRECTORY

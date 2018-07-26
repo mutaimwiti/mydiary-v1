@@ -8,10 +8,10 @@ class GlobalTestCase(BaseTestCase):
         data = {'title': 'A title', 'body': 'A body'}
         urls = ['/gibberish', '/api/v1/entries/', '/api/v1/entries/x']
         for url in urls:
-            responses.append(self.client.get(url))
-            responses.append(self.client.post(url, data=data))
-            responses.append(self.client.put(url, data=data))
-            responses.append(self.client.delete(url))
+            responses.append(self.get(url))
+            responses.append(self.post(url, data=data))
+            responses.append(self.put(url, data=data))
+            responses.append(self.delete(url))
         for response in responses:
             self.assertEqual(response.status_code, 404)
             self.assertEqual(response.mimetype, 'application/json')

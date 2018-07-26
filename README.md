@@ -35,3 +35,11 @@ To run the tests ensure:
 Run the tests
 
 `$ pytest`
+
+#### Running app
+Ensure the requirements for running tests are met.
+
+Run app
+
+`$ flask run`
+
