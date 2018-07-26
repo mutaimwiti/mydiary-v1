@@ -1,0 +1,30 @@
+# language used for project
+language:
+  - python
+
+# python versions supported
+python:
+  - 3.6
+
+# install dependencies
+install:
+  - pip install -r requirements.txt
+
+services:
+  # start postgres
+  - postgresql
+
+before_script:
+  # create a testing database
+  - psql -c 'create database mydiary_testing;' -U postgres
+
+  # copy .env.testing to .env in order to have proper db credentials
+  - cp .env.testing .env
+
+script:
+  # run tests with coverage
+  - coverage run --source=app -m pytest  && coverage report
+
+after_success:
+  # coverage report
+  - coveralls
