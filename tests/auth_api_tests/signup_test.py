@@ -2,7 +2,7 @@ import json
 from tests.auth_api_tests.base_test import BaseTestCase
 
 
-class LoginTestCase(BaseTestCase):
+class SignupTestCase(BaseTestCase):
 
     def setUp(self):
         BaseTestCase.setUp(self)
