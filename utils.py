@@ -4,9 +4,9 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(dotenv_path=find_dotenv())
 
-NOT_FOUND_MSG = 'Not found.'
-SERVER_ERROR_MSG = 'Internal server error.'
 DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+NOT_FOUND_MSG = 'Resource not found.'
+SERVER_ERROR_MSG = 'Internal server error.'
 ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
 

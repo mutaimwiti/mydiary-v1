@@ -28,4 +28,4 @@ class DeleteTestCase(BaseTestCase):
         response = self.delete('/api/v1/entries/71115')
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.mimetype, 'application/json')
-        self.assertEqual({"message": NOT_FOUND_MSG}, json.loads(response.data))
+        self.assertEqual({"message": "The entry was not found."}, json.loads(response.data))

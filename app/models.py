@@ -6,8 +6,10 @@ from app.database import DBQuery
 
 
 class ModelNotFoundException(Exception):
-    pass
-
+    def __init__(self, model):
+        if model == 'entry':
+            super(ModelNotFoundException, self).__init__('The entry was not found.')
+            
 
 class Entry:
     __db = DBQuery('entries')
@@ -18,7 +20,7 @@ class Entry:
     @staticmethod
     def __check(filters):
         if Entry.exists(filters) is False:
-            raise ModelNotFoundException
+            raise ModelNotFoundException('entry')
         
     @staticmethod    
     def exists(filters):

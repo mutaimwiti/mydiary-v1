@@ -28,7 +28,7 @@ class UpdateTestCase(BaseTestCase):
         response = self.delete('/api/v1/entries/81115')
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.mimetype, 'application/json')
-        self.assertEqual({"message": NOT_FOUND_MSG}, json.loads(response.data))
+        self.assertEqual({"message": "The entry was not found."}, json.loads(response.data))
 
     def test_fails_when_data_does_not_meet_min_length(self):
         short_data = {'title': 'Cook', 'body': 'Short'}

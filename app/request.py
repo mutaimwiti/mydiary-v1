@@ -1,5 +1,4 @@
 import re
-from app.models import User
 
 
 class ValidationException(Exception):

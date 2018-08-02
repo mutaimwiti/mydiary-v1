@@ -5,10 +5,6 @@ from utils import NOT_FOUND_MSG, SERVER_ERROR_MSG
 
 
 class Handler:
-
-    def __init__(self):
-        pass
-
     @staticmethod
     def response_message(code, message=''):
         return make_response(jsonify({'message': message}), code)
@@ -19,21 +15,15 @@ class Handler:
 
 
 class ExceptionHandler(Handler):
-    def __init__(self):
-        pass
-
     @staticmethod
     def handle(exception):
         if type(exception) == ModelNotFoundException:
-            return Handler.response_message(404, NOT_FOUND_MSG)
+            return Handler.response_message(404, str(exception))
         if type(exception) == ValidationException:
             return Handler.response_object(422, exception.errors)
 
 
 class HttpHandler(Handler):
-    def __init__(self):
-        pass
-
     @staticmethod
     def handle(code):
         if code == 404:
